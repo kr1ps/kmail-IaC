@@ -1,0 +1,85 @@
+---
+- hosts: all
+  become: true
+
+  handlers:
+    - name: restart ssh
+      service:
+        name: sshd
+        state: restarted
+
+    - name: restart fail2ban
+      service:
+        name: fail2ban
+        state: restarted
+
+  pre_tasks:
+    - name: Update apt cache if needed
+      apt: update_cache=true cache_valid_time=3600
+
+  tasks:
+    - name: Create a Group
+      group:
+        name: docker
+        state: present
+
+    - name: Create a login user
+      user:
+        name: krips
+        password: '$y$j9T$Hki5jion7W9x.vw0cNElh1$SLfSk1eTjM3jRzZJjSWpNo8DhQkzo17J6IASFCdTnu4' # generate with mkpasswd
+        groups: # Empty by default, here we give it some groups
+          - sudo
+          - docker
+        state: present
+        shell: /bin/bash       # Defaults to /bin/bash
+        system: no             # Defaults to no
+        createhome: yes        # Defaults to yes
+        home: /home/krips  # Defaults to /home/<username>
+
+    - name: Make sure SSH is more secure.
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+        validate: "sshd -T -f %s"
+      with_items:
+        - regexp: "^PasswordAuthentication"
+          line: "PasswordAuthentication no"
+        - regexp: "^PermitRootLogin"
+          line: "PermitRootLogin no"
+        - regexp: "^Port"
+          line: "Port 2004"
+      notify: restart ssh
+
+    - name: Add krips users to sudo no password rights
+      lineinfile:
+        dest: /etc/sudoers
+        regexp: "^krips"
+        line: "krips ALL=(ALL) NOPASSWD: ALL"
+        state: present
+        validate: "visudo -cf %s"
+
+    - name: Install Fail2Ban
+      apt: name=fail2ban state=present
+
+    - name: Copy etc/fail2ban/jail.conf to etc/fail2ban/jail.local
+      copy:
+        src: /etc/fail2ban/jail.conf
+        dest: /etc/fail2ban/jail.local
+        remote_src: yes
+
+    - name: Add ignore ip for own networks
+      lineinfile:
+        dest: /etc/fail2ban/jail.local
+        regexp: "^ignoreip"
+        line: ignoreip = 172.18.0.0/24 kr1ps.duckdns.org
+        state: present
+      notify: restart fail2ban
+
+    - name: upload ssh key
+      authorized_key:
+        user: krips
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+

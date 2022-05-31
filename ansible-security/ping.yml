@@ -1,0 +1,7 @@
+---
+- name: Ping module playbook usage
+  hosts: external
+  gather_facts: false
+  tasks:
+    - name: ping the local servers
+      ping:
