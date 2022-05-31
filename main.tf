@@ -1,28 +1,50 @@
-provider "aws" {
-  region = var.region
-}
+# Proxmox Full-Clone
+# ---
+# Create a new VM from a clone
 
-data "aws_ami" "ubuntu" {
-  most_recent = true
+resource "proxmox_vm_qemu" "kmail" {
+    
+    # VM General Settings
+    target_node = "mothership"
+    #vmid = "100"
+    name = "kmail"
+    desc = "email server for mailcow"
 
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
-  }
+    # VM Advanced General Settings
+    onboot = true 
 
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
+    # VM OS Settings
+    clone = "ubuntu-server-2204-template"
 
-  owners = ["099720109477"] # Canonical
-}
+    # VM System Settings
+    agent = 1
+    
+    # VM CPU Settings
+    cores = 2
+    sockets = 1
+    cpu = "host"    
+    
+    # VM Memory Settings
+    memory = 4096
 
-resource "aws_instance" "ubuntu" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = var.instance_type
+    # VM Network Settings
+    network {
+        bridge = "vmbr2"
+        model  = "virtio"
+    }
 
-  tags = {
-    Name = var.instance_name
-  }
+    # VM Cloud-Init Settings
+    os_type = "cloud-init"
+
+    # (Optional) IP Address and Gateway
+    ipconfig0 = "ip=200.1.154.149/28,gw=200.1.154.145"
+    nameserver = "8.8.8.8"
+    
+    # (Optional) Default User
+    # ciuser = "your-username"
+    
+    # (Optional) Add your SSH KEY
+    # sshkeys = <<EOF
+    # #YOUR-PUBLIC-SSH-KEY
+    # EOF
 }
