@@ -9,5 +9,5 @@
   tasks:
     - name: Ensure kr1ps-kmail role
       import_role:
-        name: mailcow-ansiblerole
+        name: mailcow-ansible
 
