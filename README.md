@@ -2,7 +2,7 @@
 kmail-IaC
 
 
-This repo builds the IaC resource for a new mailcow server using Hashicorp's terraform and Ansible.  
+This repo builds the IaC resource for a new mailcow server using Hashicorp's terraform and Ansible on a Proxmox infraestructure.  
 
 
 ## How to use this repo
@@ -13,9 +13,9 @@ Make sure you have [Terraform](https://learn.hashicorp.com/tutorials/terraform/i
 
 ### Step 1: Adjust credential variables or declare in your workspace on terraform cloud org.
 
-Rename the file [credentials.pkr.hcl.template](credentials.pkr.hcl.template) to `credentials.pkr.hcl` and adjust the variables for your Proxmox.
+Rename the file [credentials.pkr.hcl.template](credentials.pkr.hcl.template) to `credentials.auto.tfvars` and adjust the variables for your Proxmox.
 ```bash
-mv credentials.pkr.hcl.template credentials.pkr.hcl
+mv credentials.pkr.hcl.template credentials.auto.tfvars
 vim credentials.pkr.hcl
 ```
 
@@ -39,9 +39,19 @@ To Run the deploy, run:
 terraform apply
 ``` 
 
-### Step 4: Run the pre-mailcow playbook.
+### Step 4: Run the ansible-security playbook.
 
+To Run the playbook, run: 
+```bash
+cd ansible-security
+ansible-playbook  -i inventory  sec-playbook.yml
+``` 
+ 
+### Step 5: Run the ansible-mailcow playbook.
 
-the default credentials after a successful build are   
-Username: `test`   
-Password: `test`  
+To Run the playbook, run: 
+```bash
+cd ansible-mailcow
+ansible-playbook  -i inventory  mailcow.yml
+``` 
+ 

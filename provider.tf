@@ -6,13 +6,7 @@ terraform {
 
     required_version = ">= 0.13.0"
 
-    cloud {
-        organization = "kr1ps-org"
-
-        workspaces {
-        name = "kmail-iac"
-    }
-  }
+    
     required_providers {
         proxmox = {
             source = "telmate/proxmox"

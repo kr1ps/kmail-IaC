@@ -1,0 +1,13 @@
+---
+- name: mailcow-setup.
+  hosts: all
+  become: true
+  
+  roles:
+    - docker
+
+  tasks:
+    - name: Ensure kr1ps-kmail role
+      import_role:
+        name: mailcow-ansiblerole
+

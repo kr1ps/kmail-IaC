@@ -5,7 +5,7 @@ mail.kr1ps.com
 
 # Variables for all the servers
 [external:vars]
-ansible_ssh_user=test
+ansible_ssh_user=krips
 ansible_ssh_private_key_file=~/.ssh/id_ed25519
-ansible_ssh_port=22
+ansible_ssh_port=2004
 ANSIBLE_HOST_KEY_CHECKING=False
